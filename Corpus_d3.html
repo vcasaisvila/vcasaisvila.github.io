@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8">
+<script src="https://www.calderondelabarca.org/packs/js/application-47e832eb2ebe16a637f3.js"></script>
+<style>
+  body {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    position: relative;
+  }
+
+  svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  path.slice {
+    stroke-width: 2px;
+  }
+
+  polyline {
+    opacity: .3;
+    stroke: black;
+    stroke-width: 2px;
+    fill: none;
+  }
+
+  .graph-container {
+    width: 980px;
+    height: 100%;
+  }
+</style>
+<link rel="stylesheet" media="screen" href="https://www.calderondelabarca.org/packs/css/application-8b7b0043.css">
+<body>
+  <header class="top-bar container d-none d-sm-flex">
+    <a class="top-bar-logo" href="/">
+      <img src="https://www.calderondelabarca.org/packs/media/images/combinado-6264297396b1066014506487666a89db.svg">
+    </a>
+    <h1 class="top-bar-title">Grupo de Investigación Calderón de la Barca</h1>
+  </header>
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container">
+      <a class="navbar-brand d-sm-none" href="/">
+        <img src="https://www.calderondelabarca.org/packs/media/images/combinado-6264297396b1066014506487666a89db.svg">
+      </a> <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbar">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item"><a class="nav-link" href="https://www.calderondelabarca.org/"><i
+                class="fa fa-home fa-fw"></i> Presentación</a></li>
+          <li class="nav-item dropdown"><a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown"><i
+                class="fa fa-users fa-fw"></i> Grupo</a>
+            <div class="dropdown-menu"><a class="dropdown-item"
+                href="https://www.calderondelabarca.org/grupo">Información</a><a class="dropdown-item"
+                href="https://www.calderondelabarca.org/grupo/proyectos">Lista de proyectos</a><a class="dropdown-item"
+                href="https://www.calderondelabarca.org/grupo/miembros">Miembros</a></div>
+          </li>
+          <li class="nav-item dropdown"><a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown"><i
+                class="fa fa-book fa-fw"></i> Corpus</a>
+            <div class="dropdown-menu"><a class="dropdown-item"
+                href="https://www.calderondelabarca.org/corpus/informacion">Información</a><a class="dropdown-item"
+                href="https://www.calderondelabarca.org/corpus/metadatos">Metadatos</a><a class="dropdown-item"
+                href="https://www.calderondelabarca.org/busquedas">Búsquedas</a></div>
+          </li>
+          <li class="nav-item dropdown"><a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown"><i
+                class="fa fa-book fa-fw"></i> Bibliografía</a>
+            <div class="dropdown-menu"><a class="dropdown-item"
+                href="https://www.calderondelabarca.org/bibliografia/introduccion">Introducción</a><a
+                class="dropdown-item" href="https://www.calderondelabarca.org/bibliografia">Bibliografía primaria</a><a
+                class="dropdown-item" href="https://www.calderondelabarca.org/bibliografia/secundaria">Bibliografía
+                secundaria</a></div>
+          </li>
+          <li class="nav-item"><a class="nav-link" href="https://www.calderondelabarca.org/ediciones_criticas"><i
+                class="fa fa-highlighter fa-fw"></i> Ediciones críticas</a></li>
+          <li class="nav-item"><a class="nav-link" href="https://www.calderondelabarca.org/contact"><i
+                class="fa fa-inbox fa-fw"></i> Contacto</a></li>
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <div class="btn-group align-self-center mt-3">
+    <button class="btn btn-primary dataRey">Rey (A secreto agravio)</button>
+    <button class="btn btn-primary dataReyTotal">Rey (Corpus)</button>
+    <button class="btn btn-primary dataReina">Reina (Corpus)</button>
+  </div>
+  <script src="https://d3js.org/d3.v3.min.js"></script>
+  <script>
+    // Grafico
+    var svg = d3.select("body").append("div").attr("class", "align-self-center graph-container")
+      .append("svg")
+      .append("g")
+
+    svg.append("g")
+      .attr("class", "slices");
+    svg.append("g")
+      .attr("class", "labels");
+    svg.append("g")
+      .attr("class", "lines");
+
+    var width = 980,
+      height = 700,
+      radius = Math.min(width, height) / 2;
+
+    var pie = d3.layout.pie()
+      .sort(null)
+      .value(function (d) {
+        return d.value;
+      });
+
+    var arc = d3.svg.arc()
+      .outerRadius(radius * 0.8)
+      .innerRadius(radius * 0.4);
+
+    var outerArc = d3.svg.arc()
+      .innerRadius(radius * 0.9)
+      .outerRadius(radius * 0.9);
+
+    svg.attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
+    var key = function (d) {
+      return d.data.label;
+    };
+
+    function dataRey() {
+      return [{
+          label: "Sin especificar",
+          value: 3
+        },
+        {
+          label: "Décima",
+          value: 2
+        },
+        {
+          label: "Lira sextina",
+          value: 1
+        },
+        {
+          label: "Quintilla",
+          value: 1
+        },
+        {
+          label: "Redondilla",
+          value: 3
+        },
+        {
+          label: "Romance á-a",
+          value: 0
+        },
+        {
+          label: "Romance é",
+          value: 1
+        },
+        {
+          label: "Romance é-a",
+          value: 0
+        },
+        {
+          label: "Romance é-e",
+          value: 2
+        },
+        {
+          label: "Romance í-o",
+          value: 4
+        },
+        {
+          label: "Romance ó",
+          value: 0
+        },
+        {
+          label: "Romance ú-e",
+          value: 2
+        },
+        {
+          label: "Silva de pareados",
+          value: 4
+        },
+        {
+          label: "Soneto",
+          value: 0
+        }
+      ];
+    }
+
+    function dataReyTotal() {
+      return [{
+          label: "Sin especificar",
+          value: 10
+        },
+        {
+          label: "Canción",
+          value: 0
+        },
+        {
+          label: "Copla",
+          value: 0
+        },
+        {
+          label: "Copla en romance í-e",
+          value: 0
+        },
+        {
+          label: "Copla real",
+          value: 0
+        },
+        {
+          label: "Cuarteta de romance é cantado",
+          value: 0
+        },
+        {
+          label: "Décima",
+          value: 37
+        },
+        {
+          label: "Décima espinela",
+          value: 0
+        },
+        {
+          label: "Lira",
+          value: 0
+        },
+        {
+          label: "Lira sextina",
+          value: 5
+        },
+        {
+          label: "Octava real",
+          value: 24
+        },
+        {
+          label: "Octava",
+          value: 3
+        },
+        {
+          label: "Ovillejo",
+          value: 0
+        },
+        {
+          label: "Quintilla",
+          value: 22
+        },
+        {
+          label: "Pareado",
+          value: 2
+        },
+        {
+          label: "Redondilla",
+          value: 112
+        },
+        {
+          label: "Romance",
+          value: 4
+        },
+        {
+          label: "Romance con música",
+          value: 0
+        },
+        {
+          label: "Romance endecha",
+          value: 0
+        },
+        {
+          label: "Romance á-a",
+          value: 36
+        },
+        {
+          label: "Romance á-e",
+          value: 22
+        },
+        {
+          label: "Romance á-o",
+          value: 0
+        },
+        {
+          label: "Romance é ",
+          value: 34
+        },
+        {
+          label: "Romance é-a",
+          value: 51
+        },
+        {
+          label: "Romance é-e",
+          value: 49
+        },
+        {
+          label: "Romance é-o",
+          value: 41
+        },
+        {
+          label: "Romance í",
+          value: 12
+        },
+        {
+          label: "Romance í-a",
+          value: 0
+        },
+        {
+          label: "Romance í-e",
+          value: 3
+        },
+        {
+          label: "Romance í-o",
+          value: 56
+        },
+        {
+          label: "Romance ó",
+          value: 10
+        },
+        {
+          label: "Romance ó-a",
+          value: 11
+        },
+        {
+          label: "Romance ú-a",
+          value: 6
+        },
+        {
+          label: "Romance ú-e",
+          value: 2
+        },
+        {
+          label: "Romance ó-e",
+          value: 11
+        },
+        {
+          label: "Romance ú-o",
+          value: 0
+        },
+        {
+          label: "Romancillo hexasílabo",
+          value: 0
+        },
+        {
+          label: "Seguidilla",
+          value: 0
+        },
+        {
+          label: "Sexteto lira",
+          value: 2
+        },
+        {
+          label: "Romance ó-o",
+          value: 20
+        },
+        {
+          label: "Soneto",
+          value: 1
+        },
+        {
+          label: "Silva",
+          value: 31
+        },
+        {
+          label: "Versos musicados",
+          value: 1
+        },
+        {
+          label: "Silva de pareados",
+          value: 44
+        },
+        {
+          label: "Tercetos",
+          value: 0
+        },
+        {
+          label: "Villancico",
+          value: 0
+        }
+      ];
+    }
+
+    function dataReina() {
+      return [{
+          label: "Sin especificar",
+          value: 2
+        },
+        {
+          label: "Romance é",
+          value: 13
+        },
+        {
+          label: "Canción",
+          value: 1
+        },
+        {
+          label: "Copla",
+          value: 0
+        },
+        {
+          label: "Copla en romance í-e",
+          value: 0
+        },
+        {
+          label: "Copla real",
+          value: 0
+        },
+        {
+          label: "Cuarteta de romance é cantado",
+          value: 0
+        },
+        {
+          label: "Décima",
+          value: 3
+        },
+        {
+          label: "Décima espinela",
+          value: 0
+        },
+        {
+          label: "Lira",
+          value: 0
+        },
+        {
+          label: "Lira sextina",
+          value: 0
+        },
+        {
+          label: "Octava",
+          value: 0
+        },
+        {
+          label: "Octava real",
+          value: 1
+        },
+        {
+          label: "Ovillejo",
+          value: 0
+        },
+        {
+          label: "Pareado",
+          value: 0
+        },
+        {
+          label: "Quintilla",
+          value: 11
+        },
+        {
+          label: "Redondilla",
+          value: 27
+        },
+        {
+          label: "Romance",
+          value: 0
+        },
+        {
+          label: "Romance con música",
+          value: 0
+        },
+        {
+          label: "Romance endecha",
+          value: 0
+        },
+        {
+          label: "Romance á-a",
+          value: 5
+        },
+        {
+          label: "Romance á-e",
+          value: 5
+        },
+        {
+          label: "Romance á-o",
+          value: 0
+        },
+        {
+          label: "Romance é-a",
+          value: 21
+        },
+        {
+          label: "Romance é-e",
+          value: 7
+        },
+        {
+          label: "Romance é-o",
+          value: 8
+        },
+        {
+          label: "Romance í",
+          value: 4
+        },
+        {
+          label: "Romance í-a",
+          value: 1
+        },
+        {
+          label: "Romance í-e",
+          value: 2
+        },
+        {
+          label: "Romance í-o",
+          value: 10
+        },
+        {
+          label: "Romance ó",
+          value: 0
+        },
+        {
+          label: "Romance ó-a",
+          value: 3
+        },
+        {
+          label: "Romance ó-e",
+          value: 0
+        },
+        {
+          label: "Romance ó-o",
+          value: 3
+        },
+        {
+          label: "Romance ú-a",
+          value: 1
+        },
+        {
+          label: "Romance ú-e",
+          value: 3
+        },
+        {
+          label: "Romance ú-o",
+          value: 0
+        },
+        {
+          label: "Romancillo hexasílabo",
+          value: 1
+        },
+        {
+          label: "Seguidilla",
+          value: 0
+        },
+        {
+          label: "Sexteto lira",
+          value: 0
+        },
+        {
+          label: "Silva",
+          value: 3
+        },
+        {
+          label: "Silva de pareados",
+          value: 10
+        },
+        {
+          label: "Soneto",
+          value: 1
+        },
+        {
+          label: "Tercetos",
+          value: 0
+        },
+        {
+          label: "Versos musicados",
+          value: 0
+        },
+        {
+          label: "Villancico",
+          value: 0
+        }
+      ]
+    }
+
+    function changeToRey() {
+      var dRey = dataRey();
+      change(dRey);
+    }
+
+    function changeToReina() {
+      var dReina = dataReina();
+
+      change(dReina);
+    }
+
+    function changeToReyTotal() {
+      var dReyTotal = dataReyTotal();
+
+      change(dReyTotal);
+    }
+
+    d3.select(".dataRey")
+      .on("click", function () {
+        changeToRey();
+      });
+
+    d3.select(".dataReina").on("click", function () {
+      changeToReina();
+    })
+    d3.select(".dataReyTotal").on("click", function () {
+      changeToReyTotal();
+    })
+
+    function change(raw_data) {
+
+      var data = raw_data.filter(function (x) {
+        return x["value"] > 0
+      });
+
+      var color = d3.scale.ordinal()
+        .domain(data.map(function (x) {
+          return x["label"];
+        }))
+        .range(["#003366", "#A6ABBD", "#727787", "#6b486b", "#61172B", "#974958", "#FFEECA"]);
+
+      /* ------- PIE SLICES -------*/
+      var slice = svg.select(".slices").selectAll("path.slice")
+        .data(pie(data), key);
+
+      slice.enter()
+        .insert("path")
+        .style("fill", function (d) {
+          return color(d.data.label);
+        })
+        .attr("class", "slice");
+
+      slice
+        .transition().duration(1000)
+        .attrTween("d", function (d) {
+          this._current = this._current || d;
+          var interpolate = d3.interpolate(this._current, d);
+          this._current = interpolate(0);
+          return function (t) {
+            return arc(interpolate(t));
+          };
+        })
+
+      slice.exit()
+        .remove();
+
+      /* ------- TEXT LABELS -------*/
+
+      var text = svg.select(".labels").selectAll("text")
+        .data(pie(data), key);
+
+      text.enter()
+        .append("text")
+        .attr("dy", ".35em")
+        .text(function (d) {
+          return d.data.label;
+        });
+
+      function midAngle(d) {
+        return d.startAngle + (d.endAngle - d.startAngle) / 2;
+      }
+
+      text.transition().duration(1000)
+        .attrTween("transform", function (d) {
+          this._current = this._current || d;
+          var interpolate = d3.interpolate(this._current, d);
+          this._current = interpolate(0);
+          return function (t) {
+            var d2 = interpolate(t);
+            var pos = outerArc.centroid(d2);
+            pos[0] = radius * (midAngle(d2) < Math.PI ? 1 : -1);
+            return "translate(" + pos + ")";
+          };
+        })
+        .styleTween("text-anchor", function (d) {
+          this._current = this._current || d;
+          var interpolate = d3.interpolate(this._current, d);
+          this._current = interpolate(0);
+          return function (t) {
+            var d2 = interpolate(t);
+            return midAngle(d2) < Math.PI ? "start" : "end";
+          };
+        });
+
+      text.exit().remove();
+
+      /* ------- SLICE TO TEXT POLYLINES -------*/
+
+      var polyline = svg.select(".lines").selectAll("polyline")
+        .data(pie(data), key);
+
+      polyline.enter().append("polyline");
+
+      polyline.transition().duration(1000)
+        .attrTween("points", function (d) {
+          this._current = this._current || d;
+          var interpolate = d3.interpolate(this._current, d);
+          this._current = interpolate(0);
+          return function (t) {
+            var d2 = interpolate(t);
+            var pos = outerArc.centroid(d2);
+            pos[0] = radius * 0.95 * (midAngle(d2) < Math.PI ? 1 : -1);
+            return [arc.centroid(d2), outerArc.centroid(d2), pos];
+          };
+        });
+
+      polyline.exit().remove();
+    };
+
+    changeToRey();
+  </script>
+</body>
+
+</html>
